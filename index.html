@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shardfall — Survivor Bullet Hell</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="hub" class="screen">
+      <header class="hub-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <h1>SHARDFALL</h1>
+        </div>
+        <p class="tagline">Survive the swarm. Spend the essence. Ascend deeper.</p>
+        <div class="currency-bar">
+          <span class="pill" id="hub-essence">Essence: 0</span>
+          <span class="pill" id="hub-ascension">Ascension: 0</span>
+          <span class="pill" id="hub-best">Best: 0:00</span>
+        </div>
+      </header>
+
+      <nav class="hub-tabs" role="tablist">
+        <button class="tab active" data-tab="play">Deploy</button>
+        <button class="tab" data-tab="upgrades">Core</button>
+        <button class="tab" data-tab="pilots">Pilots</button>
+        <button class="tab" data-tab="weapons">Arsenal</button>
+        <button class="tab" data-tab="relics">Relics</button>
+        <button class="tab" data-tab="modifiers">Modifiers</button>
+        <button class="tab" data-tab="codex">Codex</button>
+        <button class="tab" data-tab="ascend">Ascend</button>
+      </nav>
+
+      <main class="hub-panels">
+        <section id="panel-play" class="panel active">
+          <div class="deploy-grid">
+            <div class="deploy-card">
+              <h2>Loadout</h2>
+              <p id="loadout-summary">Pilot · Weapon · Relics</p>
+              <ul id="loadout-details" class="loadout-list"></ul>
+              <button id="btn-start" class="cta">LAUNCH RUN</button>
+              <p class="hint">WASD / Arrows move · Auto-fire · Space pause · Esc hub</p>
+            </div>
+            <div class="deploy-card muted">
+              <h2>Last Run</h2>
+              <div id="last-run" class="stat-block">No runs yet.</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="panel-upgrades" class="panel">
+          <h2>Core Systems</h2>
+          <p class="panel-desc">Permanent power. Costs rise hard. Synergies unlock later.</p>
+          <div id="upgrade-list" class="card-grid"></div>
+        </section>
+
+        <section id="panel-pilots" class="panel">
+          <h2>Pilots</h2>
+          <p class="panel-desc">Each pilot reshapes how a run plays.</p>
+          <div id="pilot-list" class="card-grid"></div>
+        </section>
+
+        <section id="panel-weapons" class="panel">
+          <h2>Arsenal</h2>
+          <p class="panel-desc">Unlock starting weapons and expand the in-run pool.</p>
+          <div id="weapon-list" class="card-grid"></div>
+        </section>
+
+        <section id="panel-relics" class="panel">
+          <h2>Relics</h2>
+          <p class="panel-desc">Equip up to your relic slots. Find more through codex and ascension.</p>
+          <p id="relic-slots" class="slots-line"></p>
+          <div id="relic-list" class="card-grid"></div>
+        </section>
+
+        <section id="panel-modifiers" class="panel">
+          <h2>Risk Modifiers</h2>
+          <p class="panel-desc">Harder runs, richer essence. Stack carefully.</p>
+          <div id="modifier-list" class="card-grid"></div>
+        </section>
+
+        <section id="panel-codex" class="panel">
+          <h2>Codex</h2>
+          <p class="panel-desc">Milestones that permanently open new systems.</p>
+          <div id="codex-list" class="card-grid"></div>
+        </section>
+
+        <section id="panel-ascend" class="panel">
+          <h2>Ascension</h2>
+          <p class="panel-desc">Sacrifice essence progress for Ascension Points and a permanent multiplier. Core levels reset; unlocks stay.</p>
+          <div id="ascend-panel" class="ascend-box"></div>
+        </section>
+      </main>
+    </div>
+
+    <div id="game-wrap" class="screen hidden">
+      <canvas id="game" width="960" height="540"></canvas>
+      <div id="hud">
+        <div class="hud-left">
+          <div class="bar hp"><div id="hp-fill"></div></div>
+          <div class="bar xp"><div id="xp-fill"></div></div>
+          <span id="hud-level">Lv 1</span>
+        </div>
+        <div class="hud-center">
+          <span id="hud-time">0:00</span>
+          <span id="hud-kills">0 kills</span>
+        </div>
+        <div class="hud-right">
+          <div id="hud-weapons"></div>
+        </div>
+      </div>
+      <div id="pause-overlay" class="overlay hidden">
+        <h2>PAUSED</h2>
+        <p>Space to resume · Esc abandon to hub</p>
+      </div>
+      <div id="levelup-overlay" class="overlay hidden">
+        <h2>LEVEL UP</h2>
+        <p>Choose a mutation</p>
+        <div id="levelup-choices" class="choice-row"></div>
+      </div>
+      <div id="gameover-overlay" class="overlay hidden">
+        <h2>RUN ENDED</h2>
+        <div id="gameover-stats" class="stat-block"></div>
+        <button id="btn-to-hub" class="cta">RETURN TO HUB</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
