@@ -15,9 +15,11 @@ Then visit `http://localhost:8080`.
 ## Controls
 
 - **WASD / Arrow keys** — move
+- **Left virtual stick** (phones / tablets) — move
 - **Auto-fire** — weapons aim at nearest enemies
-- **Space** — pause / resume
-- **Esc** — pause; from pause, Esc again abandons the run
+- **Space** or **Pause (II)** — pause / resume
+- **Esc** (while paused) or **Abandon** — end run and return rewards
+- **Resume / Abandon** buttons on the pause overlay (touch-friendly)
 
 ## Meta progression
 

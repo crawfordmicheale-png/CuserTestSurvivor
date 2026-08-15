@@ -47,6 +47,18 @@ export class UI {
   bindActions() {
     document.getElementById("btn-start").addEventListener("click", () => this.startRun());
     document.getElementById("btn-to-hub").addEventListener("click", () => this.toHub());
+    document.getElementById("btn-pause").addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.game?.togglePause();
+    });
+    document.getElementById("btn-resume").addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.game?.resume();
+    });
+    document.getElementById("btn-abandon").addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.game?.abandon();
+    });
   }
 
   refresh() {
