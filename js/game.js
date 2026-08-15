@@ -2,6 +2,7 @@ import { clamp, dist, angleTo, rand, formatTime, weightedPick } from "./utils.js
 import { WEAPONS, ENEMY_TYPES, IN_RUN_MUTATIONS, xpForLevel } from "./data.js";
 import { computeMetaStats, stackedModifierEffects, awardRun } from "./meta.js";
 import { drawShip, drawEnemy, drawBullet, drawOrb, drawMine, drawStarfield } from "./sprites.js";
+import { TouchControls } from "./touch.js";
 
 const W = 960;
 const H = 540;
@@ -22,6 +23,11 @@ export class Game {
     this._boundKeyUp = (e) => this.onKeyUp(e);
     this._boundMove = (e) => this.onMouse(e);
     this._raf = 0;
+    this.touch = new TouchControls({
+      zone: document.getElementById("stick-zone"),
+      base: document.getElementById("stick-base"),
+      knob: document.getElementById("stick-knob"),
+    });
   }
 
   start() {
@@ -97,6 +103,14 @@ export class Game {
     window.addEventListener("keyup", this._boundKeyUp);
     this.canvas.addEventListener("mousemove", this._boundMove);
 
+    document.getElementById("game-wrap").classList.add("playing");
+    if (TouchControls.isTouchPreferred()) {
+      this.touch.enable();
+      document.getElementById("game-wrap").classList.add("touch-mode");
+    } else {
+      document.getElementById("game-wrap").classList.remove("touch-mode");
+    }
+
     if (this.levelQueue > 0) this.openLevelUp();
     this.loop();
   }
@@ -107,6 +121,22 @@ export class Game {
     window.removeEventListener("keydown", this._boundKey);
     window.removeEventListener("keyup", this._boundKeyUp);
     this.canvas.removeEventListener("mousemove", this._boundMove);
+    this.touch.disable();
+    document.getElementById("game-wrap").classList.remove("playing", "touch-mode");
+  }
+
+  togglePause() {
+    if (this.dead || this.levelUpOpen) return;
+    this.paused = !this.paused;
+    if (!this.paused) this.touch.resetStick();
+    this.syncOverlay();
+  }
+
+  resume() {
+    if (this.dead || this.levelUpOpen) return;
+    this.paused = false;
+    this.touch.resetStick();
+    this.syncOverlay();
   }
 
   addWeapon(id) {
@@ -131,9 +161,7 @@ export class Game {
     this.keys[e.code] = true;
     if (e.code === "Space") {
       e.preventDefault();
-      if (this.dead || this.levelUpOpen) return;
-      this.paused = !this.paused;
-      this.syncOverlay();
+      this.togglePause();
     }
     if (e.code === "Escape") {
       if (this.dead) return;
@@ -164,6 +192,7 @@ export class Game {
   }
 
   endRun(natural) {
+    if (this.dead) return;
     this.dead = true;
     this.paused = true;
     const run = {
@@ -216,18 +245,27 @@ export class Game {
     if (this.keys.KeyS || this.keys.ArrowDown) my += 1;
     if (this.keys.KeyA || this.keys.ArrowLeft) mx -= 1;
     if (this.keys.KeyD || this.keys.ArrowRight) mx += 1;
-    if (mx || my) {
+    const stick = this.touch.vector();
+    if (stick.x || stick.y) {
+      mx = stick.x;
+      my = stick.y;
+    } else if (mx || my) {
       const len = Math.hypot(mx, my) || 1;
       mx /= len;
       my /= len;
     }
-    const spd = p.baseSpeed * p.moveSpeedMul * (1 + (this.pilot.stats.moveSpeed || 0) * 0);
+    const spd = p.baseSpeed * p.moveSpeedMul;
     p.x += mx * spd * dt;
     p.y += my * spd * dt;
 
-    const worldMx = this.mouse.x - W / 2 + p.x;
-    const worldMy = this.mouse.y - H / 2 + p.y;
-    p.angle = angleTo(p.x, p.y, worldMx, worldMy);
+    // Face move direction on stick; otherwise nearest threat / mouse
+    if (Math.hypot(mx, my) > 0.05) {
+      p.angle = Math.atan2(my, mx);
+    } else {
+      const worldMx = this.mouse.x - W / 2 + p.x;
+      const worldMy = this.mouse.y - H / 2 + p.y;
+      p.angle = angleTo(p.x, p.y, worldMx, worldMy);
+    }
 
     if (p.regen > 0) p.hp = Math.min(p.maxHp, p.hp + p.regen * dt);
 
@@ -304,25 +342,26 @@ export class Game {
         (1 + (w.level - 1) * 0.18) *
         (1 + Math.min(5, this.save.ascensionPoints) * (this.meta.ascDamage || 0));
       const count = b.count + this.player.bonusProjectiles + Math.floor((w.level - 1) / 2);
-      const size = b.size * this.player.areaMul;
+      const radius = (b.radius || 4) * this.player.areaMul;
       const nearest = this.nearestEnemy();
 
       if (w.def.pattern === "aimed" || w.def.pattern === "beam" || w.def.pattern === "rail") {
         const ang = nearest ? angleTo(this.player.x, this.player.y, nearest.x, nearest.y) : this.player.angle;
         for (let i = 0; i < count; i++) {
           const spread = (i - (count - 1) / 2) * 0.08;
-          this.firePlayer(ang + spread, b.speed, dmg * (w.def.pattern === "rail" ? 1 : 1), size, b.pierce || 1, w.def.color, w.def.pattern === "beam" ? 0.25 : 1.2);
+          this.firePlayer(ang + spread, b.speed, dmg, radius, b.pierce || 1, w.def.color, w.def.pattern === "beam" ? 0.25 : 1.2);
         }
       } else if (w.def.pattern === "spread") {
-        const base = nearest ? angleTo(this.player.x, this.player.y, nearest.x, nearest.y) : this.player.angle;
+        const baseAng = nearest ? angleTo(this.player.x, this.player.y, nearest.x, nearest.y) : this.player.angle;
+        const cone = b.spread || 0.22;
         for (let i = 0; i < count; i++) {
-          const spread = (i - (count - 1) / 2) * 0.22;
-          this.firePlayer(base + spread, b.speed, dmg, size, 1, w.def.color, b.range || 0.5);
+          const spread = (i - (count - 1) / 2) * cone;
+          this.firePlayer(baseAng + spread, b.speed, dmg, radius, 1, w.def.color, 0.55);
         }
       } else if (w.def.pattern === "nova") {
         for (let i = 0; i < count; i++) {
           const ang = (i / count) * Math.PI * 2 + this.time;
-          this.firePlayer(ang, b.speed, dmg, size, 1, w.def.color, 0.9);
+          this.firePlayer(ang, b.speed, dmg, radius, 1, w.def.color, 0.9);
         }
       } else if (w.def.pattern === "orbit") {
         // refresh orbiters
@@ -335,7 +374,7 @@ export class Game {
             n,
             r: 48 + w.level * 4,
             dmg,
-            size: size + 4,
+            size: radius + 4,
             color: w.def.color,
             hitCd: {},
           });
@@ -345,9 +384,9 @@ export class Game {
           this.mines.push({
             x: this.player.x + rand(-20, 20),
             y: this.player.y + rand(-20, 20),
-            r: size,
+            r: radius,
             dmg,
-            life: b.duration * this.player.durationMul,
+            life: (b.duration || 3) * this.player.durationMul,
             color: w.def.color,
           });
         }
@@ -360,7 +399,7 @@ export class Game {
             vx: Math.cos(ang) * b.speed,
             vy: Math.sin(ang) * b.speed,
             dmg,
-            size,
+            size: radius,
             pierce: 1,
             life: 2.5,
             color: w.def.color,
@@ -635,7 +674,7 @@ export class Game {
 
   hurtPlayer(raw) {
     const p = this.player;
-    if (p.iFrames > 0 || p.shield > 0) return;
+    if (this.dead || p.iFrames > 0 || p.shield > 0) return;
     const dmg = raw * (1 - p.armor) * p.damageTakenMul;
     p.hp -= dmg;
     p.iFrames = 0.45;

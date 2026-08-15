@@ -38,14 +38,14 @@ export const PILOTS = [
 ];
 
 export const WEAPONS = [
-  { id: "pulse", name: "Pulse Needle", desc: "Fast single shots toward nearest foe.", color: "#7ec8ff", unlockCost: 0, base: { damage: 8, cooldown: 0.35, speed: 420, count: 1, spread: 4 }, pattern: "aimed" },
-  { id: "scatter", name: "Scatterbit", desc: "Fan of short-range pellets.", color: "#e8a04a", unlockCost: 150, unlockReq: "codex_first_10", base: { damage: 5, cooldown: 0.55, speed: 380, count: 5, spread: 3, spread: 0.45 }, pattern: "spread" },
-  { id: "orbit", name: "Orbit Blades", desc: "Spinning blades around you.", color: "#3ec7a0", unlockCost: 220, unlockReq: "codex_survive_5", base: { damage: 6, cooldown: 0.2, speed: 0, count: 3, size: 10, range: 1.4 }, pattern: "orbit" },
-  { id: "nova", name: "Nova Pulse", desc: "Periodic ring burst.", color: "#8b7cf0", unlockCost: 280, unlockReq: "codex_kill_1k", base: { damage: 12, cooldown: 1.4, speed: 220, count: 12, size: 5 }, pattern: "nova" },
-  { id: "beam", name: "Lance Beam", desc: "Piercing laser toward mouse/aim.", color: "#e05a6a", unlockCost: 350, unlockReq: "codex_weapon_3", base: { damage: 4, cooldown: 0.08, speed: 900, count: 1, size: 3, pierce: 4 }, pattern: "beam" },
-  { id: "mines", name: "Drift Mines", desc: "Drops lingering mines.", color: "#e6c35c", unlockCost: 320, unlockReq: "codex_bullet_hell", base: { damage: 18, cooldown: 1.1, speed: 0, count: 1, size: 14, duration: 3.5 }, pattern: "mine" },
-  { id: "swarm", name: "Bit Swarm", desc: "Homing micro-drones.", color: "#9ff0d6", unlockCost: 450, unlockReq: "codex_essence_5k", base: { damage: 4, cooldown: 0.7, speed: 260, count: 3, size: 5 }, pattern: "homing" },
-  { id: "rail", name: "Rail Spike", desc: "Slow heavy piercing shot.", color: "#c4b5ff", unlockCost: 550, unlockReq: "codex_ascend_1", base: { damage: 40, cooldown: 1.6, speed: 700, count: 1, size: 6, pierce: 12 }, pattern: "rail" },
+  { id: "pulse", name: "Pulse Needle", desc: "Fast single shots toward nearest foe.", color: "#7ec8ff", unlockCost: 0, base: { damage: 8, cooldown: 0.35, speed: 420, count: 1, radius: 4 }, pattern: "aimed" },
+  { id: "scatter", name: "Scatterbit", desc: "Fan of short-range pellets.", color: "#e8a04a", unlockCost: 150, unlockReq: "codex_first_10", base: { damage: 5, cooldown: 0.55, speed: 380, count: 5, radius: 3, range: 0.45 }, pattern: "spread" },
+  { id: "orbit", name: "Orbit Blades", desc: "Spinning blades around you.", color: "#3ec7a0", unlockCost: 220, unlockReq: "codex_survive_5", base: { damage: 6, cooldown: 0.2, speed: 0, count: 3, radius: 10, duration: 1.4 }, pattern: "orbit" },
+  { id: "nova", name: "Nova Pulse", desc: "Periodic ring burst.", color: "#8b7cf0", unlockCost: 280, unlockReq: "codex_kill_1k", base: { damage: 12, cooldown: 1.4, speed: 220, count: 12, radius: 5 }, pattern: "nova" },
+  { id: "beam", name: "Lance Beam", desc: "Piercing laser toward mouse/aim.", color: "#e05a6a", unlockCost: 350, unlockReq: "codex_weapon_3", base: { damage: 4, cooldown: 0.08, speed: 900, count: 1, radius: 3, pierce: 4 }, pattern: "beam" },
+  { id: "mines", name: "Drift Mines", desc: "Drops lingering mines.", color: "#e6c35c", unlockCost: 320, unlockReq: "codex_bullet_hell", base: { damage: 18, cooldown: 1.1, speed: 0, count: 1, radius: 14, duration: 3.5 }, pattern: "mine" },
+  { id: "swarm", name: "Bit Swarm", desc: "Homing micro-drones.", color: "#9ff0d6", unlockCost: 450, unlockReq: "codex_essence_5k", base: { damage: 4, cooldown: 0.7, speed: 260, count: 3, radius: 5 }, pattern: "homing" },
+  { id: "rail", name: "Rail Spike", desc: "Slow heavy piercing shot.", color: "#c4b5ff", unlockCost: 550, unlockReq: "codex_ascend_1", base: { damage: 40, cooldown: 1.6, speed: 700, count: 1, radius: 6, pierce: 12 }, pattern: "rail" },
 ];
 
 export const RELICS = [
@@ -122,5 +122,5 @@ export function upgradeCost(def, level) {
 }
 
 export function xpForLevel(level) {
-  return Math.floor(8 + level * 4 + Math.pow(level, 1.35) * 2);
+  return Math.floor(5 + level * 3.2 + Math.pow(level, 1.3) * 1.6);
 }

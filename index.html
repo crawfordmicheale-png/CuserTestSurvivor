@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <title>Shardfall — Survivor Bullet Hell</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -44,7 +45,7 @@
               <p id="loadout-summary">Pilot · Weapon · Relics</p>
               <ul id="loadout-details" class="loadout-list"></ul>
               <button id="btn-start" class="cta">LAUNCH RUN</button>
-              <p class="hint">WASD / Arrows move · Auto-fire · Space pause · Esc hub</p>
+              <p class="hint">WASD / Arrows or left stick · Auto-fire · Space / Pause · Esc abandon</p>
             </div>
             <div class="deploy-card muted">
               <h2>Last Run</h2>
@@ -112,11 +113,25 @@
         </div>
         <div class="hud-right">
           <div id="hud-weapons"></div>
+          <button type="button" id="btn-pause" class="hud-btn" aria-label="Pause">II</button>
         </div>
       </div>
+
+      <div id="touch-controls" class="touch-controls" aria-hidden="true">
+        <div id="stick-zone" class="stick-zone">
+          <div id="stick-base" class="stick-base">
+            <div id="stick-knob" class="stick-knob"></div>
+          </div>
+        </div>
+      </div>
+
       <div id="pause-overlay" class="overlay hidden">
         <h2>PAUSED</h2>
-        <p>Space to resume · Esc abandon to hub</p>
+        <p>Resume to continue, or abandon the run.</p>
+        <div class="overlay-actions">
+          <button type="button" id="btn-resume" class="cta">RESUME</button>
+          <button type="button" id="btn-abandon" class="cta cta-ghost">ABANDON</button>
+        </div>
       </div>
       <div id="levelup-overlay" class="overlay hidden">
         <h2>LEVEL UP</h2>
