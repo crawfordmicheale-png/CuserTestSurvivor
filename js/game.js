@@ -164,6 +164,7 @@ export class Game {
   }
 
   endRun(natural) {
+    if (this.dead) return;
     this.dead = true;
     this.paused = true;
     const run = {
@@ -304,25 +305,26 @@ export class Game {
         (1 + (w.level - 1) * 0.18) *
         (1 + Math.min(5, this.save.ascensionPoints) * (this.meta.ascDamage || 0));
       const count = b.count + this.player.bonusProjectiles + Math.floor((w.level - 1) / 2);
-      const size = b.size * this.player.areaMul;
+      const radius = (b.radius || 4) * this.player.areaMul;
       const nearest = this.nearestEnemy();
 
       if (w.def.pattern === "aimed" || w.def.pattern === "beam" || w.def.pattern === "rail") {
         const ang = nearest ? angleTo(this.player.x, this.player.y, nearest.x, nearest.y) : this.player.angle;
         for (let i = 0; i < count; i++) {
           const spread = (i - (count - 1) / 2) * 0.08;
-          this.firePlayer(ang + spread, b.speed, dmg * (w.def.pattern === "rail" ? 1 : 1), size, b.pierce || 1, w.def.color, w.def.pattern === "beam" ? 0.25 : 1.2);
+          this.firePlayer(ang + spread, b.speed, dmg, radius, b.pierce || 1, w.def.color, w.def.pattern === "beam" ? 0.25 : 1.2);
         }
       } else if (w.def.pattern === "spread") {
-        const base = nearest ? angleTo(this.player.x, this.player.y, nearest.x, nearest.y) : this.player.angle;
+        const baseAng = nearest ? angleTo(this.player.x, this.player.y, nearest.x, nearest.y) : this.player.angle;
+        const cone = b.spread || 0.22;
         for (let i = 0; i < count; i++) {
-          const spread = (i - (count - 1) / 2) * 0.22;
-          this.firePlayer(base + spread, b.speed, dmg, size, 1, w.def.color, b.range || 0.5);
+          const spread = (i - (count - 1) / 2) * cone;
+          this.firePlayer(baseAng + spread, b.speed, dmg, radius, 1, w.def.color, 0.55);
         }
       } else if (w.def.pattern === "nova") {
         for (let i = 0; i < count; i++) {
           const ang = (i / count) * Math.PI * 2 + this.time;
-          this.firePlayer(ang, b.speed, dmg, size, 1, w.def.color, 0.9);
+          this.firePlayer(ang, b.speed, dmg, radius, 1, w.def.color, 0.9);
         }
       } else if (w.def.pattern === "orbit") {
         // refresh orbiters
@@ -335,7 +337,7 @@ export class Game {
             n,
             r: 48 + w.level * 4,
             dmg,
-            size: size + 4,
+            size: radius + 4,
             color: w.def.color,
             hitCd: {},
           });
@@ -345,9 +347,9 @@ export class Game {
           this.mines.push({
             x: this.player.x + rand(-20, 20),
             y: this.player.y + rand(-20, 20),
-            r: size,
+            r: radius,
             dmg,
-            life: b.duration * this.player.durationMul,
+            life: (b.duration || 3) * this.player.durationMul,
             color: w.def.color,
           });
         }
@@ -360,7 +362,7 @@ export class Game {
             vx: Math.cos(ang) * b.speed,
             vy: Math.sin(ang) * b.speed,
             dmg,
-            size,
+            size: radius,
             pierce: 1,
             life: 2.5,
             color: w.def.color,
@@ -635,7 +637,7 @@ export class Game {
 
   hurtPlayer(raw) {
     const p = this.player;
-    if (p.iFrames > 0 || p.shield > 0) return;
+    if (this.dead || p.iFrames > 0 || p.shield > 0) return;
     const dmg = raw * (1 - p.armor) * p.damageTakenMul;
     p.hp -= dmg;
     p.iFrames = 0.45;
